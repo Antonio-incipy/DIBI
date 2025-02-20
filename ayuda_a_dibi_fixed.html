@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda a Dibi con su Diabetes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-pink-200 flex justify-center items-center h-screen">
+
+    <div id="inicio" class="bg-white rounded-2xl shadow-2xl p-8 w-96 text-center">
+        <div class="text-4xl">😄</div>
+        <p class="text-lg mt-4 font-semibold">¡Hola soy DIBI y tengo diabetes! ¿Puedes ayudarme? Responde a estas preguntas y aprendamos juntos.</p>
+        <input id="nombreJugador" type="text" placeholder="Escribe tu nombre" class="mt-4 px-4 py-2 border rounded-full w-full text-center">
+        <button onclick="iniciarJuego()" class="bg-blue-500 text-white px-6 py-2 rounded-full mt-4 hover:bg-yellow-400 transition">Empezar</button>
+    </div>
+
+    <div id="juego" class="bg-white rounded-2xl shadow-2xl p-8 w-96 text-center hidden">
+        <div id="emoji" class="text-4xl">🙂</div>
+        <p id="pregunta" class="text-lg mt-4 font-semibold"></p>
+        <div id="opciones" class="mt-4 space-y-2"></div>
+        <p class="mt-4 font-semibold">Puntuación: <span id="puntos">100</span></p>
+    </div>
+
+    <div id="final" class="bg-white rounded-2xl shadow-2xl p-8 w-96 text-center hidden">
+        <div class="text-4xl">🤩</div>
+        <p class="text-lg mt-4 font-semibold">¡Gracias por ayudarme! ¿Quieres probar de nuevo?</p>
+        <button onclick="reiniciarJuego()" class="bg-blue-500 text-white px-6 py-2 rounded-full mt-4 hover:bg-yellow-400 transition">Jugar de nuevo</button>
+        <button onclick="volverInicio()" class="bg-blue-500 text-white px-6 py-2 rounded-full mt-4 hover:bg-yellow-400 transition">Volver al inicio</button>
+    </div>
+
+    <div id="puntuaciones" class="absolute top-4 right-4 bg-white p-4 rounded-2xl shadow-lg">
+        <p class="font-bold text-lg">🏆 Últimas puntuaciones:</p>
+        <ul id="listaPuntuaciones" class="mt-2 text-sm"></ul>
+    </div>
+
+    <script>
+        const preguntas = [
+            { pregunta: "¿Qué debo hacer si mi azúcar está muy alta?", opciones: ["Tomar agua", "Comer dulces", "No hacer nada"], correcta: 0 },
+            { pregunta: "¿Cuál es un buen alimento para mantener mi azúcar estable?", opciones: ["Frutas y verduras", "Refrescos", "Dulces"], correcta: 0 },
+            { pregunta: "¿Qué es la insulina?", opciones: ["Una hormona", "Un caramelo", "Un juguete"], correcta: 0 },
+            { pregunta: "¿Por qué debo medir mi azúcar?", opciones: ["Para estar sano", "Por diversión", "No es necesario"], correcta: 0 },
+            { pregunta: "¿Qué pasa si como demasiados dulces?", opciones: ["Mi azúcar sube", "Nada", "Me vuelvo más rápido"], correcta: 0 },
+            { pregunta: "¿Qué es la diabetes?", opciones: ["Una enfermedad", "Un superpoder", "Una fruta"], correcta: 0 },
+            { pregunta: "¿Qué debo hacer si me siento mareado?", opciones: ["Avisar a un adulto", "Dormir", "Correr"], correcta: 0 },
+            { pregunta: "¿Es importante hacer ejercicio?", opciones: ["Sí, ayuda mucho", "No, es aburrido", "No lo sé"], correcta: 0 },
+            { pregunta: "¿Puedo comer helado si tengo diabetes?", opciones: ["Sí, con moderación", "Nunca", "Todo el que quiera"], correcta: 0 },
+            { pregunta: "¿Por qué debo visitar al doctor?", opciones: ["Para revisar mi salud", "Porque me gusta", "No es necesario"], correcta: 0 }
+        ];
+
+        let nombreJugador = "";
+        let indicePregunta = 0;
+        let puntuacion = 100;
+
+        function iniciarJuego() {
+            nombreJugador = document.getElementById("nombreJugador").value || "Jugador";
+            document.getElementById("inicio").classList.add("hidden");
+            document.getElementById("juego").classList.remove("hidden");
+            indicePregunta = 0;
+            puntuacion = 100;
+            document.getElementById("puntos").innerText = puntuacion;
+            mostrarPregunta();
+        }
+
+        function mostrarPregunta() {
+            if (indicePregunta >= preguntas.length) {
+                finalizarJuego();
+                return;
+            }
+
+            const pregunta = preguntas[indicePregunta];
+            document.getElementById("pregunta").innerText = pregunta.pregunta;
+
+            const opcionesContainer = document.getElementById("opciones");
+            opcionesContainer.innerHTML = "";
+
+            pregunta.opciones.forEach((opcion, index) => {
+                const btn = document.createElement("button");
+                btn.innerText = opcion;
+                btn.classList.add("bg-blue-300", "px-4", "py-2", "rounded-full", "w-full", "hover:bg-green-500", "hover:text-white");
+                btn.onclick = () => evaluarRespuesta(index);
+                opcionesContainer.appendChild(btn);
+            });
+        }
+
+        function evaluarRespuesta(indice) {
+            if (indice === preguntas[indicePregunta].correcta) {
+                puntuacion += 10;
+            } else {
+                puntuacion -= 10;
+            }
+
+            document.getElementById("puntos").innerText = puntuacion;
+            actualizarEmoji();
+            indicePregunta++;
+            setTimeout(mostrarPregunta, 500);
+        }
+
+        function actualizarEmoji() {
+            const emoji = document.getElementById("emoji");
+            if (puntuacion >= 120) emoji.innerText = "🤩";
+            else if (puntuacion >= 80) emoji.innerText = "🙂";
+            else emoji.innerText = "😢";
+        }
+
+        function finalizarJuego() {
+            guardarPuntuacion();
+            document.getElementById("juego").classList.add("hidden");
+            document.getElementById("final").classList.remove("hidden");
+        }
+
+        function reiniciarJuego() {
+            iniciarJuego();
+        }
+
+        function volverInicio() {
+            document.getElementById("final").classList.add("hidden");
+            document.getElementById("inicio").classList.remove("hidden");
+        }
+
+        function guardarPuntuacion() {
+            let puntuaciones = JSON.parse(localStorage.getItem("puntuaciones")) || [];
+            puntuaciones.unshift({ nombre: nombreJugador, puntos: puntuacion });
+            puntuaciones = puntuaciones.slice(0, 10);
+            localStorage.setItem("puntuaciones", JSON.stringify(puntuaciones));
+            mostrarPuntuaciones();
+        }
+
+        function mostrarPuntuaciones() {
+            let puntuaciones = JSON.parse(localStorage.getItem("puntuaciones")) || [];
+            let lista = document.getElementById("listaPuntuaciones");
+            lista.innerHTML = "";
+            puntuaciones.forEach(p => {
+                let li = document.createElement("li");
+                li.innerText = `${p.nombre}: ${p.puntos} puntos`;
+                lista.appendChild(li);
+            });
+        }
+
+        mostrarPuntuaciones();
+    </script>
+
+</body>
+</html>
